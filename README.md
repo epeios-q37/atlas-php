@@ -35,7 +35,7 @@ while ( true ) {
 
 ### *XSL* file
 
-This is the content of the `Main.xsl` file which name is given given as parameter to above `$dom.setLayout(...)` instruction. 
+This is the content of the `Main.xsl` file which name is given as parameter to above `$dom.setLayout(...)` instruction. 
 
 ```XML
 <?xml version="1.0" encoding="UTF-8"?>
