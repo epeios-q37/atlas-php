@@ -9,6 +9,7 @@ The [*Atlas* toolkit](https://atlastk.org/) is a library which facilitates the p
 [![Little demonstration](http://q37.info/download/Hello.gif "A basic example")](http://q37.info/s/atk/Hello/)
 
 ```PHP
+<?php
 require "phar://Atlas.phar/Atlas.php";
 
 class Hello extends Threaded {
@@ -35,6 +36,7 @@ EOT;
   switch ($action) {
   case "Connect":
    $dom->setLayout("", self::$body);
+   $dom->focus("input");
    break;
   case "Typing":
    $dom->setContent("name", $dom->getContent($id));
