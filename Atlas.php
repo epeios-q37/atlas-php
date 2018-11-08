@@ -40,7 +40,8 @@ function getXDHq() {
   $xdhqPath = "phar://Atlas.phar/";
  }
 
- require $xdhqPath . "XDHq.php";
+// require $xdhqPath . "XDHq.php";
+	require( "XDHq.php");
 }
 
 getXDHq();
@@ -180,6 +181,10 @@ class Atlas extends Thread {
    $action = $this->dom->getAction($id);
    call_user_func(array($this->userObject, 'handle'), $this->dom, $action, $id);
   }
+ }
+
+ public static function createXML(string $rootTag) {
+ 	 return new XDHqXML( $rootTag );
  }
 };
 ?>
