@@ -1,22 +1,51 @@
-# *PHP* version of the *Atlas* toolkit
-
-![PHP logo](https://q37.info/download/assets/PHP.png "PHP")
-
-The [*Atlas* toolkit](https://atlastk.org/) is a library dedicated to the handling of web interfaces.
-
-## *Hello, World!*
-
-Here's how a [*Hello, World!*](https://en.wikipedia.org/wiki/%22Hello,_World!%22_program) type application made with the *Atlas* toolkit looks like:
-
-![Little demonstration](http://q37.info/download/assets/Hello.gif "A basic example")
-
-For an online demonstration: <http://q37.info/runkit/Hello>.
-
-Source code:
-
-```PHP
 <?php
-require "phar://Atlas.phar/Atlas.php";
+/*
+	Copyright (C) 2018 Claude SIMON (http://q37.info/contact/).
+
+	This file is part of XDHq.
+
+	XDHq is free software: you can redistribute it and/or
+	modify it under the terms of the GNU Affero General Public License as
+	published by the Free Software Foundation, either version 3 of the
+	License, or (at your option) any later version.
+
+	XDGq is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+	Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with XDHq If not, see <http://www.gnu.org/licenses/>.
+*/
+
+// This is the one-file version, which does not need the 'Head.html' and the 'Main.html' files.
+
+function getAtlas() {
+ if (getenv("EPEIOS_SRC") === false) {
+  $atlasPath = "phar://Atlas.phar/";
+ } else {
+  switch (strtoupper(substr(php_uname('s'), 0, 3))) {
+  case "WIN":
+   $epeiosPath = "h:\\hg\\epeios\\";
+   break;
+  case "LIN":
+   $epeiosPath = "/home/csimon/hg/epeios/";
+   break;
+  case "DAR":
+   $epeiosPath = "/Users/csimon/hg/epeios/";
+   break;
+  default:
+   echo "Unknown OS !!!\n";
+   break;
+  }
+
+  $atlasPath = $epeiosPath . "tools/xdhq/Atlas/ZND/";
+ }
+
+ require $atlasPath . "Atlas.php";
+}
+
+getAtlas();
 
 class Hello extends Threaded {
  // The content of the 'Main.html' file.
@@ -37,7 +66,7 @@ class Hello extends Threaded {
  </div>
 </div>
 EOT;
- 
+
  public function handle($dom, $action, $id) {
   switch ($action) {
   case "Connect":
@@ -62,7 +91,7 @@ function hello() {
  return new Hello();
 }
 
- // The content of the 'Head.html' file.
+// The content of the 'Head.html' file.
 $head = <<<EOT
 <title>"Hello, World !" example</title>
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAMFBMVEUEAvyEhsxERuS8urQsKuycnsRkYtzc2qwUFvRUVtysrrx0ctTs6qTMyrSUksQ0NuyciPBdAAABHklEQVR42mNgwAa8zlxjDd2A4POfOXPmzZkFCAH2M8fNzyALzDlzg2ENssCbMwkMOsgCa858YOjBKxBzRoHhD7LAHiBH5swCT9HQ6A9ggZ4zp7YCrV0DdM6pBpAAG5Blc2aBDZA68wCsZPuZU0BDH07xvHOmAGKKvgMP2NA/Zw7ADIYJXGDgLQeBBSCBFu0aoAPYQUadMQAJAE29zwAVWMCWpgB08ZnDQGsbGhpsgCqBQHNfzRkDEIPlzFmo0T5nzoMovjPHoAK8Zw5BnA5yDosDSAVYQOYMKIDZzkoDzagAsjhqzjRAfXTmzAQgi/vMQZA6pjtAvhEk0E+ATWRRm6YBZuScCUCNN5szH1D4TGdOoSrggtiNAH3vBBjwAQCglIrSZkf1MQAAAABJRU5ErkJggg==" />
@@ -90,31 +119,3 @@ EOT;
 
 Atlas::launch("Connect", 'hello', $head, null, "Hello");
 ?>
-```
-
-## *TodoMVC*
-
-And here's how the *Atlas* toolkit version of the [*TodoMVC*](http://todomvc.com/) application looks like: 
-
-[![TodoMVC](http://q37.info/download/TodoMVC.gif "The TodoMVC application made with the Atlas toolkit")](https://github.com/epeios-q37/todomvc-java)
-
-For an online demonstration: <http://q37.info/runkit/TodoMVC>.
-
-## Content of the repository
-
-The `Atlas` directory contains the *PHP* source code of the *Atlas* toolki, which is not needed to run the examples.
-
-`Atlas.phar` is the file which is needed to use the *Atlas* toolkit in your own application.
-
-All other directories are examples.
-
-To run an example, launch `php <Name>/main.php`, where `<Name>` is the name of the example (`Blank`, `Chatroom`…).
-
-NOTA: **You need *PHP* with [*pthreads*](http://php.net/manual/book.pthreads.php)!**
-
-The *Atlas* toolkit is also available for:
-- *Java*: <http://github.com/epeios-q37/atlas-java>
-- *Node.js*: <http://github.com/epeios-q37/atlas-node>
-- *Python*: <http://github.com/epeios-q37/atlas-python>
-
-For more information about the *Atlas* toolkit, go to <http://atlastk.org/>.
