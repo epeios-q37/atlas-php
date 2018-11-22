@@ -26,11 +26,18 @@ class XDHq_DEMO extends XDHq_SHRD {
  }
 }
 
+function getEnv_( $name, $value = ""  ) {
+ if ( getenv($name) !== false )
+  return trim(getenv($name));
+ else
+  return trim($value);
+}
+
 class XDHqDOM_DEMO extends Threaded {
  private $socket;
  private static $token = "";
  private static $protocolLabel = "712a58bf-2c9a-47b2-ba5e-d359a99966de";
- private static $protocolVersion = "0";
+ private static $protocolVersion = "1";
  private static function isTokenEmpty_() {
   return empty(self::$token) || (substr(self::$token, 0, 1) == '&');
  }
@@ -61,7 +68,7 @@ class XDHqDOM_DEMO extends Threaded {
   }
  }
  private function getByte_($socket) {
-  while (!($c = fgetc($socket))); // Workaround concerning a arbitrary timeout!
+  while (!($c = fgetc($socket))); // Workaround concerning an arbitrary timeout!
 
   return unpack("C", $c)[1];
  }
@@ -71,7 +78,6 @@ class XDHqDOM_DEMO extends Threaded {
 
   while ($byte & 0x80) {
    $byte = $this->getByte_($socket);
-
    $size = ($size << 7) + ($byte & 0x7f);
   }
 
@@ -108,42 +114,47 @@ class XDHqDOM_DEMO extends Threaded {
  }
  function __construct() {
   // Due to multithreading handling of PHP, global variables can not be used in methods !
-  $address = "atlastk.org";
-  $httpPort = "";
+  $pAddr = "atlastk.org";
+  $pPort = 53800;
+  $wAddr = "";
+  $wPort = "";
   $cgi = "xdh";
-  $port = 53800;
-
-  if (getenv("ATK") !== false) {
-   switch (getenv("ATK")) {
-   case 'DEV':
-    $address = "localhost";
-    $httpPort = ":8080";
-	echo("\tDEV mode !\n");
-    break;
-   case 'TEST':
-    $cgi = "xdh_";
-	echo("\tTEST mode !\n");
-    break;
-   default:
-	die( "Bad 'ATK' environment variable value : should be 'DEV' or 'TEST' !" );
-   }
+  
+  switch (getEnv_("ATK")) {
+  case 'DEV':
+   $pAddr = "localhost";
+   $wPort = "8080";
+   echo("\tDEV mode !\n");
+   break;
+  case 'TEST':
+   $cgi = "xdh_";
+   echo("\tTEST mode !\n");
+   break;
+  case '':
+   break;
+  default:
+   die( "Bad 'ATK' environment variable value : should be 'DEV' or 'TEST' !" );
   }
+
+  $pAddr = getEnv_( "ATK_PADDR", $pAddr);
+  $pPort = intval( getEnv_("ATK_PPORT", strval( $pPort)));
+  $wAddr = getEnv_( "ATK_WADDR", $wAddr);
+  $wPort = getEnv_( "ATK_WPORT", $wPort);
+
+  if ( $wAddr == "" )
+	$wAddr = $pAddr;
+
+  if ( $wPort != "" )
+   $wPort = ":" . $wPort;
 
   if ($this->isTokenEmpty_()) {
+   $token = getEnv_("ATK_TOKEN");
 
-   $token = getenv("ATK_TOKEN");
-
-   if ($token !== false) {
-
-    $token = trim($token);
-
-    if ($token !== "") {
-     self::$token = "&" . $token;
-    }
-   }
+   if (!empty($token))
+    self::$token = "&" . $token;
   }
 
-  $this->socket = fsockopen($address, $port, $errno, $errstr);
+  $this->socket = fsockopen($pAddr, $pPort, $errno, $errstr);
 
   if (!$this->socket) {
    die("$errstr ($errno)\n");
@@ -152,32 +163,31 @@ class XDHqDOM_DEMO extends Threaded {
   $this->writeString_(self::$token, $this->socket);
 
   if ($this->isTokenEmpty_()) {
-   $this->writeString_(XDHq_DEMO::$headContent, $this->socket);
-  }
+    $this->writeString_(XDHq_DEMO::$headContent, $this->socket);
 
-  fflush($this->socket);
+    fflush($this->socket);
 
   if ($this->isTokenEmpty_()) {
-   self::$token = $this->getString_($this->socket);
+    self::$token = $this->getString_($this->socket);
 
-   if ($this->isTokenEmpty_()) {
-    throw new Exception("Invalid connection information !!!");
-   }
+    if ($this->isTokenEmpty_())
+     throw new Exception("Invalid connection information !!!");
+  }
 
-   $url = "http://" . $address . $httpPort . "/" . $cgi . ".php?_token=" . self::$token;
-   echo $url . "\n";
-   echo "Open above URL in a web browser. Enjoy!\n";
-   XDHq_SHRD::open($url);
-  } else {
-   if ($this->getString_($this->socket) != self::$token) {
+  if ($wPort != ":0") {
+    $url = "http://" . $wAddr . $wPort . "/" . $cgi . ".php?_token=" . self::$token;
+    echo $url . "\n";
+    echo "Open above URL in a web browser. Enjoy!\n";
+    XDHq_SHRD::open($url);
+    }
+  } else if ($this->getString_($this->socket) != self::$token) {
     throw new Exception("Unmatched token !!!");
-   }
-
   }
 
   $this->getString_($this->socket); // Language.
   $this->writeString_(self::$protocolLabel, $this->socket);
   $this->writeString_(self::$protocolVersion, $this->socket);
+  $this->writeString_("ZND", $this->socket);
   fflush($this->socket);
  }
  function getAction(&$id) {
@@ -191,7 +201,6 @@ class XDHqDOM_DEMO extends Threaded {
   }
 
   $id = $this->getString_($this->socket);
-
   $action = $this->getString_($this->socket);
 
   if (empty($action)) {
