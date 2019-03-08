@@ -45,7 +45,7 @@ class XDHq extends XDHq_SHRD{
 	static function readAsset( $path, string $dir = "" ) {
 		return file_get_contents( self::getAssetFilename_( $path, $dir ) );
 	}
-	static function launch(string $headContent, $mode, string $dir ) {
+	static function launch(callable $callback, callable $userCallback, string $headContent, $mode, string $dir ) {
 		self::$mode_ = $mode;
 		self::$dir = $dir;
 
@@ -54,7 +54,7 @@ class XDHq extends XDHq_SHRD{
 			XDHq_PROD::launch();
 			break;
 		case self::MODE_DEMO:
-			XDHq_DEMO::launch($headContent );
+			XDHq_DEMO::launch($callback, $userCallback, $headContent );
 			break;
 		default:
 			throw new Exception( "Unknown mode !!!");
@@ -90,7 +90,7 @@ class XDHqDOM extends Threaded {
 
 		return $keysAndValues;
 	}
-	function __construct() {
+	function __construct($parent) {
 		switch ( XDHq::getMode() ) {
 		case XDHq::MODE_PROD:
 			$this->dom_ = new XDHqDOM_PROD;
@@ -101,6 +101,15 @@ class XDHqDOM extends Threaded {
 		default:
 			die( "Unknown mode !!!");
 		}
+
+		$this->parent = $parent;
+	}
+	function setDEMOStuff( Threaded $thread, $id )
+	{
+		$this->dom_->daemonThread = $thread;
+		$this->dom_->shared = $thread->shared;
+		$this->dom_->id = $id;
+		$this->dom_->parent = $this->parent;
 	}
 	private function call_( ...$args ) {
 		return $this->dom_->call( ...$args );
@@ -112,7 +121,9 @@ class XDHqDOM extends Threaded {
 		return self::call_( "Execute_1", XDHq::RT_STRING, 1, $script, 0 );
 	}
 	function alert( string $message ) {
-		self::call_( "Alert_1", XDHq::RT_NONE, 1, $message, 0 );
+		self::call_( "Alert_1", XDHq::RT_STRING, 1, $message, 0 );
+		# For the return value being 'RT_STRING' instead of 'RT_NONE',
+		# see the 'alert' primitive in 'XDHqXDH'.
 	}
 	function confirm( string $message ) {
 		return self::call_( "Confirm_1", XDHq::RT_STRING, 1, $message, 0 ) == "true";
