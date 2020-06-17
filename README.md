@@ -1,3 +1,9 @@
+# Discontinued
+
+Because this library requires threads, it does not work with the usual version of *PHP*. The required version of *PHP* (https://www.php.net/manual/en/book.pthreads.php) is not easy to install (https://www.php.net/manual/en/pthreads.installation.php), hence probably the fact that nobody has ever used the *PHP* version of the *Atlas* toolkit.
+
+As a result, the development of this library is interrupted, but could be resumed if the situation regarding the ZTS (https://www.php.net/manual/en/pthreads.requirements.php) version ever improves .
+
 # *PHP* version of the *Atlas* toolkit
 
 ![For PHP](http://q37.info/download/assets/PHP.png "PHP logo")
